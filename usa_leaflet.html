@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>USA Reflectivity Overlay</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 90vh; width: 100vw; }
+    #slider-container {
+      position: absolute;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.8);
+      padding: 10px 20px;
+      border-radius: 8px;
+      z-index: 1000;
+      text-align: center;
+    }
+    #hour-label {
+      font-family: monospace;
+      font-size: 1.2em;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="slider-container" style="display:none;">
+  <input type="range" id="hour-slider" min="0" max="0" value="0" step="1">
+  <span id="hour-label"></span>
+</div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  var map = L.map('map').setView([37.8, -96], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  var imageBounds = [[24, -125], [50, -66.5]];
+  var overlay = null;
+  var pngList = [];
+
+  // Prevent Leaflet from handling arrow keys (disable keyboard pan)
+  map.keyboard.disable();
+
+  // Load the PNG list from Flask endpoint
+  fetch('/reflectivity_images')
+    .then(response => response.json())
+    .then(function(images) {
+      pngList = images;
+      if (pngList.length === 0) return;
+      var slider = document.getElementById('hour-slider');
+      var label = document.getElementById('hour-label');
+      slider.max = pngList.length - 1;
+      slider.value = 0;
+      document.getElementById('slider-container').style.display = 'block';
+
+      function updateOverlay(idx) {
+        if (overlay) map.removeLayer(overlay);
+        overlay = L.imageOverlay(pngList[idx], imageBounds, {opacity: 0.7});
+        overlay.addTo(map);
+        var match = pngList[idx].match(/reflectivity_(\d+)\.png/);
+        label.textContent = match ? `Hour: ${match[1]}` : '';
+      }
+
+      slider.oninput = function() {
+        updateOverlay(parseInt(slider.value));
+      };
+
+      // Add arrow key support
+      document.addEventListener('keydown', function(e) {
+        if (['ArrowRight', 'ArrowLeft'].includes(e.key) && !e.target.matches('input, textarea')) {
+          e.preventDefault();
+          var idx = parseInt(slider.value);
+          if (e.key === 'ArrowRight' && idx < pngList.length - 1) {
+            slider.value = idx + 1;
+            slider.dispatchEvent(new Event('input'));
+          } else if (e.key === 'ArrowLeft' && idx > 0) {
+            slider.value = idx - 1;
+            slider.dispatchEvent(new Event('input'));
+          }
+        }
+      });
+
+      // Show first image
+      updateOverlay(0);
+    });
+</script>
+</body>
+</html>
