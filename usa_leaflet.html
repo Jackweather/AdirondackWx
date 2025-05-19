@@ -31,6 +31,11 @@
   <input type="range" id="hour-slider" min="0" max="0" value="0" step="1">
   <span id="hour-label"></span>
 </div>
+<div id="toggle-menu" style="position:absolute;top:10px;left:10px;z-index:1100;background:rgba(255,255,255,0.9);padding:8px 16px;border-radius:8px;">
+  <label><input type="checkbox" id="toggle-refc" checked> Show REFC</label>
+  <label style="margin-left:12px;"><input type="checkbox" id="toggle-mslp" checked> Show MSLP</label>
+  <label style="margin-left:12px;"><input type="checkbox" id="toggle-temp2m" checked> Show 2m Temp</label>
+</div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
   var map = L.map('map').setView([37.8, -96], 4);
@@ -38,12 +43,32 @@
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
-  var imageBounds = [[24, -125], [50, -66.5]];
-  var overlay = null;
+  // Move overlay further left (west): decrease the western longitude
+  var imageBounds = [[24, -126], [50, -69]];
+  var overlayRefc = null;
+  var overlayMslp = null;
+  var overlayTemp2m = null;
   var pngList = [];
+
+  var showRefc = true;
+  var showMslp = true;
+  var showTemp2m = true;
 
   // Prevent Leaflet from handling arrow keys (disable keyboard pan)
   map.keyboard.disable();
+
+  document.getElementById('toggle-refc').addEventListener('change', function() {
+    showRefc = this.checked;
+    updateOverlay(parseInt(document.getElementById('hour-slider').value));
+  });
+  document.getElementById('toggle-mslp').addEventListener('change', function() {
+    showMslp = this.checked;
+    updateOverlay(parseInt(document.getElementById('hour-slider').value));
+  });
+  document.getElementById('toggle-temp2m').addEventListener('change', function() {
+    showTemp2m = this.checked;
+    updateOverlay(parseInt(document.getElementById('hour-slider').value));
+  });
 
   // Load the PNG list from Flask endpoint
   fetch('/reflectivity_images')
@@ -57,13 +82,30 @@
       slider.value = 0;
       document.getElementById('slider-container').style.display = 'block';
 
-      function updateOverlay(idx) {
-        if (overlay) map.removeLayer(overlay);
-        overlay = L.imageOverlay(pngList[idx], imageBounds, {opacity: 0.7});
-        overlay.addTo(map);
-        var match = pngList[idx].match(/reflectivity_(\d+)\.png/);
-        label.textContent = match ? `Hour: ${match[1]}` : '';
-      }
+      window.updateOverlay = function(idx) {
+        if (overlayRefc) map.removeLayer(overlayRefc);
+        if (overlayMslp) map.removeLayer(overlayMslp);
+        if (overlayTemp2m) map.removeLayer(overlayTemp2m);
+        if (showRefc) {
+          overlayRefc = L.imageOverlay(pngList[idx].refc, imageBounds, {opacity: 0.7});
+          overlayRefc.addTo(map);
+        } else {
+          overlayRefc = null;
+        }
+        if (showMslp) {
+          overlayMslp = L.imageOverlay(pngList[idx].mslp, imageBounds, {opacity: 0.7});
+          overlayMslp.addTo(map);
+        } else {
+          overlayMslp = null;
+        }
+        if (showTemp2m) {
+          overlayTemp2m = L.imageOverlay(pngList[idx].temp2m, imageBounds, {opacity: 0.7});
+          overlayTemp2m.addTo(map);
+        } else {
+          overlayTemp2m = null;
+        }
+        label.textContent = `Hour: ${pngList[idx].hour}`;
+      };
 
       slider.oninput = function() {
         updateOverlay(parseInt(slider.value));

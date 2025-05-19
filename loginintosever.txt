@@ -1,0 +1,1 @@
+ssh -i "C:\Users\jacfo\Downloads\weathermodelwebpage folder\jack-keypair.pem" ubuntu@18.118.12.1
