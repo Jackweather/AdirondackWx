@@ -73,6 +73,19 @@ def run_test_script():
     threading.Thread(target=run_mslp).start()
     return "test.py and mslp_script.py started in background!", 200
 
+@app.route("/run-mslp")
+def run_mslp_script():
+    def run_mslp():
+        try:
+            subprocess.run(["python", "mslp_script.py"], check=True)
+            print("mslp_script.py ran successfully!")
+        except subprocess.CalledProcessError as e:
+            error_trace = traceback.format_exc()
+            print(f"Error running mslp_script.py asynchronously:\n{error_trace}")
+
+    threading.Thread(target=run_mslp).start()
+    return "mslp_script.py started in background!", 200
+
 @app.route("/<path:filename>")
 def serve_static_file(filename):
     return send_from_directory(BASE_DIR, filename)

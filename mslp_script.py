@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 # --- Clean up old files in grib_files and static/MSLP directories ---
-for folder in [os.path.join("Hrrr", "grib_files"), os.path.join("Hrrr", "static", "MSLP")]:
+for folder in [os.path.join("Hrrr", "static", "MSLP", "grib_files"), os.path.join("Hrrr", "static", "MSLP")]:
     if os.path.exists(folder):
         for f in os.listdir(folder):
             file_path = os.path.join(folder, f)
@@ -19,8 +19,8 @@ for folder in [os.path.join("Hrrr", "grib_files"), os.path.join("Hrrr", "static"
 # Directories
 base_url = "https://nomads.ncep.noaa.gov/cgi-bin/filter_hrrr_2d.pl"
 output_dir = "Hrrr"
-grib_dir = os.path.join(output_dir, "grib_files")
 mslp_dir = os.path.join(output_dir, "static", "MSLP")
+grib_dir = os.path.join(mslp_dir, "grib_files")  # Now inside MSLP
 os.makedirs(grib_dir, exist_ok=True)
 os.makedirs(mslp_dir, exist_ok=True)
 

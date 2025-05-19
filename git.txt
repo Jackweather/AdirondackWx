@@ -1,41 +1,9 @@
-1. Open your project folder in VS Code
-Go to File > Open Folder... and choose the folder you want to push to GitHub.
-
-2. Initialize Git (if not done yet)
-Open the Terminal in VS Code:
-
-scss
-Copy
-Edit
-Ctrl + ` (backtick)
-Then run:
-
-bash
-Copy
-Edit
 git init
-3. Add your remote GitHub repository
-bash
-Copy
-Edit
-git remote add origin https://github.com/Jackweather/weathermodelwebpagefinal.git
-4. Add all your files and commit them
-bash
-Copy
-Edit
+
+
+
 git add .
 git commit -m "Initial commit"
-5. Push your code to GitHub
-If it's your first push:
 
-bash
-Copy
-Edit
-git branch -M main
-git push -u origin main
-For future pushes:
 
-bash
-Copy
-Edit
-git push
+git push -u origin main --force

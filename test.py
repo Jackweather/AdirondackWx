@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 # --- Clean up old files in grib_files and pngs directories ---
-for folder in [os.path.join("Hrrr", "grib_files"), os.path.join("Hrrr", "static", "pngs")]:
+for folder in [os.path.join("Hrrr", "static", "REFC", "grib_files"), os.path.join("Hrrr", "static", "pngs")]:
     if os.path.exists(folder):
         for f in os.listdir(folder):
             file_path = os.path.join(folder, f)
@@ -18,8 +18,8 @@ for folder in [os.path.join("Hrrr", "grib_files"), os.path.join("Hrrr", "static"
 # Directories
 base_url = "https://nomads.ncep.noaa.gov/cgi-bin/filter_hrrr_2d.pl"
 output_dir = "Hrrr"
-grib_dir = os.path.join(output_dir, "grib_files")
-refc_dir = os.path.join(output_dir, "static", "REFC")  # Changed from pngs to REFC
+refc_dir = os.path.join(output_dir, "static", "REFC")
+grib_dir = os.path.join(refc_dir, "grib_files")  # Now inside REFC
 os.makedirs(grib_dir, exist_ok=True)
 os.makedirs(refc_dir, exist_ok=True)
 
